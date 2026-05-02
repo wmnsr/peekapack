@@ -1,0 +1,129 @@
+.footer {
+  position: relative;
+  margin-top: var(--space-20);
+}
+
+.wave {
+  color: var(--color-text);
+  line-height: 0;
+}
+
+.wave svg {
+  width: 100%;
+  height: 60px;
+}
+
+.content {
+  background: var(--color-text);
+  color: var(--color-white);
+  padding: var(--space-12) 0 var(--space-8);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: var(--space-12);
+}
+
+/* Brand */
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.logoRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.logoIcon {
+  font-size: var(--text-3xl);
+}
+
+.logoText {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  background: var(--gradient-button);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.tagline {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}
+
+/* Columns */
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.columnTitle {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-white);
+  margin-bottom: var(--space-2);
+}
+
+.footerLink {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  transition: all var(--transition-fast);
+}
+
+.footerLink:hover {
+  color: var(--color-accent);
+  transform: translateX(4px);
+}
+
+.contactText {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: var(--text-sm);
+}
+
+.whatsappBtn {
+  align-self: flex-start;
+  margin-top: var(--space-2);
+}
+
+/* Bottom */
+.bottom {
+  margin-top: var(--space-10);
+  padding-top: var(--space-6);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.bottom p {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+    text-align: center;
+  }
+
+  .brand {
+    align-items: center;
+  }
+
+  .column {
+    align-items: center;
+  }
+
+  .whatsappBtn {
+    align-self: center;
+  }
+}
