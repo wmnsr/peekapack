@@ -11,9 +11,7 @@
  */
 
 import "./globals.css";
-import Navbar from "@/components/ui/Navbar";
-import Footer from "@/components/ui/Footer";
-import { CartProvider } from "@/context/CartContext";
+import LayoutShell from "@/components/LayoutShell";
 
 export const metadata = {
   title: "Peek-a-Pack | Handcrafted Surprise Blind Bags 🎁",
@@ -39,17 +37,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        {/* 
-          📚 LEARNING NOTE: Context Provider
-          CartProvider wraps the entire app so every page 
-          can access the shopping cart data. It's like a 
-          shared notebook that all pages can read and write to!
-        */}
-        <CartProvider>
-          <Navbar />
-          <main>{children}</main>
-          <Footer />
-        </CartProvider>
+        <LayoutShell>{children}</LayoutShell>
       </body>
     </html>
   );
