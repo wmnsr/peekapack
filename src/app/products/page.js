@@ -19,7 +19,14 @@ export default function ProductsPage() {
   const [activeTheme, setActiveTheme] = useState("all");
   const [activeSize, setActiveSize] = useState(null);
 
-  /* Scroll-reveal animation */
+  /**
+   * 📚 LEARNING NOTE: Intersection Observer + Filter Changes
+   * 
+   * We need this observer to re-run whenever the filtered list
+   * changes. Otherwise, new product cards stay invisible because
+   * the observer never sees them. That's why filteredProducts
+   * is in the dependency array!
+   */
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -31,7 +38,7 @@ export default function ProductsPage() {
     );
     document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
+  }, [filteredProducts]);
 
   /**
    * 📚 LEARNING NOTE: useMemo
