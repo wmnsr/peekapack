@@ -12,10 +12,24 @@
 
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { PRODUCTS, TESTIMONIALS, HOW_IT_WORKS_STEPS } from "@/lib/mockData";
 import styles from "./page.module.css";
+
+/**
+ * 📚 LEARNING NOTE: Deterministic Particle Positions
+ * 
+ * We can't use Math.random() directly in the render because the
+ * server generates different random numbers than the client.
+ * This causes a "hydration mismatch" error. Instead, we use a
+ * simple formula based on the index to create pseudo-random but
+ * DETERMINISTIC positions — same result every time!
+ */
+function seededPosition(index, salt) {
+  const x = ((index * 137 + salt * 53) % 100);
+  return x;
+}
 
 export default function HomePage() {
   const featuredProducts = PRODUCTS.filter((p) => p.is_featured).slice(0, 4);
@@ -55,11 +69,11 @@ export default function HomePage() {
               key={i}
               className={styles.particle}
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 5}s`,
-                animationDuration: `${3 + Math.random() * 4}s`,
-                fontSize: `${12 + Math.random() * 20}px`,
+                left: `${seededPosition(i, 7)}%`,
+                top: `${seededPosition(i, 13)}%`,
+                animationDelay: `${(i * 7) % 5}s`,
+                animationDuration: `${3 + (i * 3) % 4}s`,
+                fontSize: `${12 + (i * 11) % 20}px`,
               }}
             >
               {["✨", "⭐", "🌟", "💫", "🎀", "🎁", "🎊"][i % 7]}

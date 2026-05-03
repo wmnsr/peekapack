@@ -20,6 +20,30 @@ export default function ProductsPage() {
   const [activeSize, setActiveSize] = useState(null);
 
   /**
+   * 📚 LEARNING NOTE: useMemo
+   * 
+   * useMemo is like a "smart calculator" — it only recalculates
+   * the filtered products when the filter values change, not on
+   * every single re-render. This makes the page faster!
+   * 
+   * IMPORTANT: This must be BEFORE the useEffect that uses it,
+   * because JavaScript won't let you use a variable before it's created!
+   */
+  const filteredProducts = useMemo(() => {
+    return PRODUCTS.filter((p) => {
+      if (!p.is_active) return false;
+      if (activeTheme !== "all" && p.theme !== activeTheme) return false;
+      if (activeSize) {
+        const hasVariant = p.variants.some(
+          (v) => v.size === activeSize && v.stock_count > 0
+        );
+        if (!hasVariant) return false;
+      }
+      return true;
+    });
+  }, [activeTheme, activeSize]);
+
+  /**
    * 📚 LEARNING NOTE: Intersection Observer + Filter Changes
    * 
    * We need this observer to re-run whenever the filtered list
@@ -39,27 +63,6 @@ export default function ProductsPage() {
     document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, [filteredProducts]);
-
-  /**
-   * 📚 LEARNING NOTE: useMemo
-   * 
-   * useMemo is like a "smart calculator" — it only recalculates
-   * the filtered products when the filter values change, not on
-   * every single re-render. This makes the page faster!
-   */
-  const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter((p) => {
-      if (!p.is_active) return false;
-      if (activeTheme !== "all" && p.theme !== activeTheme) return false;
-      if (activeSize) {
-        const hasVariant = p.variants.some(
-          (v) => v.size === activeSize && v.stock_count > 0
-        );
-        if (!hasVariant) return false;
-      }
-      return true;
-    });
-  }, [activeTheme, activeSize]);
 
   return (
     <div className={styles.page}>
