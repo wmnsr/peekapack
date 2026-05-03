@@ -32,8 +32,8 @@ export default function Footer() {
                 <Image
                   src="/images/logo.png"
                   alt="Peek-a-Pack Logo"
-                  width={36}
-                  height={36}
+                  width={48}
+                  height={48}
                   className={styles.logoImg}
                 />
                 <span className={styles.logoText}>Peek-a-Pack</span>

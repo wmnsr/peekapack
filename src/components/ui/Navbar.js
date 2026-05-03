@@ -34,8 +34,8 @@ export default function Navbar() {
           <Image
             src="/images/logo.png"
             alt="Peek-a-Pack Logo"
-            width={40}
-            height={40}
+            width={52}
+            height={52}
             className={styles.logoImg}
             priority
           />
