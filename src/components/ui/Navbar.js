@@ -10,6 +10,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import styles from "./Navbar.module.css";
 
@@ -30,7 +31,14 @@ export default function Navbar() {
       <div className={styles.inner}>
         {/* Logo */}
         <Link href="/" className={styles.logo} id="nav-logo">
-          <span className={styles.logoIcon}>🎁</span>
+          <Image
+            src="/images/logo.png"
+            alt="Peek-a-Pack Logo"
+            width={40}
+            height={40}
+            className={styles.logoImg}
+            priority
+          />
           <span className={styles.logoText}>Peek-a-Pack</span>
         </Link>
 

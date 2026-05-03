@@ -35,9 +35,10 @@
   color: var(--color-text);
 }
 
-.logoIcon {
-  font-size: var(--text-2xl);
-  animation: float 3s ease-in-out infinite;
+.logoImg {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 
 .logoText {

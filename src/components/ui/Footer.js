@@ -6,6 +6,7 @@
  */
 
 import Link from "next/link";
+import Image from "next/image";
 import styles from "./Footer.module.css";
 
 export default function Footer() {
@@ -28,7 +29,13 @@ export default function Footer() {
             {/* Brand column */}
             <div className={styles.brand}>
               <div className={styles.logoRow}>
-                <span className={styles.logoIcon}>🎁</span>
+                <Image
+                  src="/images/logo.png"
+                  alt="Peek-a-Pack Logo"
+                  width={36}
+                  height={36}
+                  className={styles.logoImg}
+                />
                 <span className={styles.logoText}>Peek-a-Pack</span>
               </div>
               <p className={styles.tagline}>

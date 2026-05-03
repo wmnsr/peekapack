@@ -38,8 +38,10 @@
   gap: var(--space-2);
 }
 
-.logoIcon {
-  font-size: var(--text-3xl);
+.logoImg {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
 }
 
 .logoText {
