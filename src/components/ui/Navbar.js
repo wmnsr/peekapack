@@ -32,7 +32,7 @@ export default function Navbar() {
         {/* Logo */}
         <Link href="/" className={styles.logo} id="nav-logo">
           <Image
-            src="/images/logo.png"
+            src="/images/logo.svg"
             alt="Peek-a-Pack Logo"
             width={52}
             height={52}

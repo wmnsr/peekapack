@@ -30,7 +30,7 @@ export default function Footer() {
             <div className={styles.brand}>
               <div className={styles.logoRow}>
                 <Image
-                  src="/images/logo.png"
+                  src="/images/logo.svg"
                   alt="Peek-a-Pack Logo"
                   width={48}
                   height={48}
