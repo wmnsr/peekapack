@@ -332,7 +332,7 @@
 }
 
 /* ============================================================
- * ABOUT US SECTION
+ * MEET THE MAKERS / ABOUT SECTION
  * ============================================================ */
 .about {
   background: var(--color-bg);
@@ -340,9 +340,9 @@
 
 .aboutGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1.3fr;
   gap: var(--space-12);
-  align-items: center;
+  align-items: start;
 }
 
 .aboutImage {
@@ -351,23 +351,45 @@
   justify-content: center;
 }
 
-.aboutPlaceholder {
-  width: 300px;
-  height: 300px;
-  background: var(--gradient-card);
+/* Real photo frame */
+.aboutPhotoFrame {
+  position: relative;
+  width: 340px;
   border-radius: var(--radius-2xl);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-4);
-  font-size: 5rem;
-  box-shadow: var(--shadow-lg);
-  border: 4px solid var(--color-white);
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+  border: 5px solid var(--color-white);
+  background: var(--gradient-card);
 }
 
+.aboutPhoto {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  object-position: top center;
+  max-height: 420px;
+}
+
+.photoOverlayTag {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(30, 27, 75, 0.75));
+  color: var(--color-white);
+  text-align: center;
+  padding: var(--space-8) var(--space-4) var(--space-3);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  letter-spacing: 0.03em;
+}
+
+/* Floating decorations */
 .aboutDecor1,
 .aboutDecor2,
-.aboutDecor3 {
+.aboutDecor3,
+.aboutDecor4 {
   position: absolute;
   font-size: 2rem;
   animation: float 4s ease-in-out infinite;
@@ -391,6 +413,14 @@
   animation-delay: 3s;
 }
 
+.aboutDecor4 {
+  top: 25%;
+  left: 20px;
+  animation-delay: 2s;
+  font-size: 1.5rem;
+}
+
+/* Bio content */
 .aboutContent h2 {
   margin-bottom: var(--space-4);
 }
@@ -401,10 +431,109 @@
   line-height: 1.8;
 }
 
+.aboutContent p strong {
+  color: var(--color-primary);
+}
+
+.makerIntro {
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 2px dashed var(--color-primary-light);
+}
+
+.makerIntro h3 {
+  font-size: var(--text-2xl);
+  margin-bottom: var(--space-1);
+}
+
+.makerAge {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted) !important;
+  font-weight: 600;
+  margin-bottom: 0 !important;
+}
+
+/* Hobbies */
+.hobbySection {
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.hobbyTitle {
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-3);
+  color: var(--color-text);
+}
+
+.hobbyTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.hobbyTag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: var(--color-highlight-light);
+  color: #7C3AED;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  transition: all var(--transition-base);
+  cursor: default;
+}
+
+.hobbyTag::before {
+  content: attr(data-emoji);
+  font-size: var(--text-sm);
+}
+
+.hobbyTag:nth-child(1) { background: #FEF3C7; color: #B45309; }
+.hobbyTag:nth-child(2) { background: var(--color-primary-light); color: var(--color-primary); }
+.hobbyTag:nth-child(3) { background: var(--color-secondary-light); color: var(--color-secondary-hover); }
+.hobbyTag:nth-child(4) { background: #E0E7FF; color: #4338CA; }
+.hobbyTag:nth-child(5) { background: #FDE68A; color: #92400E; }
+.hobbyTag:nth-child(6) { background: #DBEAFE; color: #1D4ED8; }
+
+.hobbyTag:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: var(--shadow-md);
+}
+
+/* Achievements */
+.achievementSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+  background: var(--color-white);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.achievementItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.achievementIcon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+/* Stats */
 .aboutStats {
   display: flex;
-  gap: var(--space-8);
+  gap: var(--space-6);
   margin-top: var(--space-6);
+  flex-wrap: wrap;
 }
 
 .stat {
@@ -426,6 +555,35 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+/* Fun-fact banner */
+.funFactBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-top: var(--space-12);
+  padding: var(--space-6);
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-highlight-light) 50%, var(--color-secondary-light) 100%);
+  border-radius: var(--radius-2xl);
+  border: 2px dashed var(--color-primary);
+}
+
+.funFactIcon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  animation: float 3s ease-in-out infinite;
+}
+
+.funFactBanner p {
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.funFactBanner p strong {
+  color: var(--color-primary);
 }
 
 /* ============================================================
@@ -562,10 +720,26 @@
     justify-content: center;
   }
 
-  .aboutPlaceholder {
-    width: 220px;
-    height: 220px;
-    font-size: 3.5rem;
+  .aboutPhotoFrame {
+    width: 260px;
+  }
+
+  .aboutPhoto {
+    max-height: 340px;
+  }
+
+  .hobbyTags {
+    justify-content: center;
+  }
+
+  .achievementSection {
+    text-align: left;
+  }
+
+  .funFactBanner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
   }
 
   .teaserGrid {

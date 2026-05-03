@@ -14,6 +14,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { PRODUCTS, TESTIMONIALS, HOW_IT_WORKS_STEPS } from "@/lib/mockData";
 import styles from "./page.module.css";
 
@@ -195,31 +196,88 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ===== ABOUT US ===== */}
+      {/* ===== MEET THE MAKERS ===== */}
       <section className={`section ${styles.about}`} id="about">
         <div className="container">
+          <h2 className="section-title reveal">Meet the Makers! 🎨</h2>
+          <p className="section-subtitle reveal">
+            The creative duo behind every Peek-a-Pack surprise!
+          </p>
+
           <div className={styles.aboutGrid}>
+            {/* Photo & decorations */}
             <div className={`${styles.aboutImage} reveal`}>
-              <div className={styles.aboutPlaceholder}>
-                <span>👧🏽</span>
-                <span>👧🏽</span>
+              <div className={styles.aboutPhotoFrame}>
+                <Image
+                  src="/images/twins.jpeg"
+                  alt="Avika & Anishka Rawat — the twin sisters behind Peek-a-Pack"
+                  width={960}
+                  height={1280}
+                  className={styles.aboutPhoto}
+                  priority
+                />
+                <div className={styles.photoOverlayTag}>
+                  ✨ The Peek-a-Pack Duo
+                </div>
               </div>
               <div className={styles.aboutDecor1}>🎨</div>
               <div className={styles.aboutDecor2}>✂️</div>
               <div className={styles.aboutDecor3}>🎀</div>
+              <div className={styles.aboutDecor4}>⭐</div>
             </div>
+
+            {/* Bio content */}
             <div className={`${styles.aboutContent} reveal reveal-delay-2`}>
-              <h2>Meet the Makers! 🎨</h2>
+              <div className={styles.makerIntro}>
+                <h3>👋 Hi, we&apos;re Avika &amp; Anishka!</h3>
+                <p className={styles.makerAge}>
+                  10-year-old twin sisters &bull; Class 5 &bull; The Shriram Universal School, Palava
+                </p>
+              </div>
+
               <p>
-                Hi! We&apos;re twin sisters who love crafting tiny things. 
-                This summer, we decided to turn our hobby into something 
-                special — handmade blind bags filled with miniature surprises!
+                We&apos;re twin sisters who absolutely love creating tiny things
+                with our hands! This summer, we turned our favourite hobby into
+                something magical — <strong>Peek-a-Pack</strong>, handmade blind
+                bags filled with miniature surprises, crafted and packed entirely
+                by us. 💕
               </p>
               <p>
-                Every single piece inside our bags is carefully crafted, 
-                painted, and packed by us. We put our hearts into each one, 
-                and we hope they bring a smile to your face! 💕
+                Every single piece inside our bags is carefully designed, hand-painted,
+                and lovingly packed. We believe small things can bring the biggest
+                smiles, and we pour our hearts into each one!
               </p>
+
+              {/* Hobbies & talents */}
+              <div className={styles.hobbySection}>
+                <h4 className={styles.hobbyTitle}>Our Superpowers 💪</h4>
+                <div className={styles.hobbyTags}>
+                  <span className={styles.hobbyTag} data-emoji="🤸‍♀️">Gymnastics</span>
+                  <span className={styles.hobbyTag} data-emoji="💃">Dance</span>
+                  <span className={styles.hobbyTag} data-emoji="🏃‍♀️">Kho Kho</span>
+                  <span className={styles.hobbyTag} data-emoji="🎤">Singing</span>
+                  <span className={styles.hobbyTag} data-emoji="🎨">Crafting</span>
+                  <span className={styles.hobbyTag} data-emoji="📚">Study (sometimes 😄)</span>
+                </div>
+              </div>
+
+              {/* Achievements */}
+              <div className={styles.achievementSection}>
+                <div className={styles.achievementItem}>
+                  <span className={styles.achievementIcon}>🏆</span>
+                  <span>Multiple prizes in Gymnastics &amp; Dance competitions</span>
+                </div>
+                <div className={styles.achievementItem}>
+                  <span className={styles.achievementIcon}>❤️</span>
+                  <span>Love helping people &amp; spreading joy</span>
+                </div>
+                <div className={styles.achievementItem}>
+                  <span className={styles.achievementIcon}>✨</span>
+                  <span>Super creative — always imagining the next big idea!</span>
+                </div>
+              </div>
+
+              {/* Stats */}
               <div className={styles.aboutStats}>
                 <div className={styles.stat}>
                   <span className={styles.statNumber}>100+</span>
@@ -230,11 +288,25 @@ export default function HomePage() {
                   <span className={styles.statLabel}>Unique Themes</span>
                 </div>
                 <div className={styles.stat}>
+                  <span className={styles.statNumber}>2</span>
+                  <span className={styles.statLabel}>Young Makers</span>
+                </div>
+                <div className={styles.stat}>
                   <span className={styles.statNumber}>😊</span>
                   <span className={styles.statLabel}>Happy Faces</span>
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Fun-fact banner */}
+          <div className={`${styles.funFactBanner} reveal`}>
+            <span className={styles.funFactIcon}>💡</span>
+            <p>
+              <strong>Fun fact:</strong> Avika &amp; Anishka started crafting miniatures as a lockdown 
+              hobby and loved it so much they decided to share the joy with everyone! Each Peek-a-Pack 
+              takes hours of careful handiwork — that&apos;s dedication and love in every bag! 🎁
+            </p>
           </div>
         </div>
       </section>
