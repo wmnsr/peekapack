@@ -44,3 +44,36 @@
   .waButtons { justify-content: flex-start; }
   .buyerInfo { flex-direction: column; gap: var(--space-1); }
 }
+
+/* Loading & empty states */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-16) var(--space-4);
+  text-align: center;
+  gap: var(--space-4);
+  color: var(--color-text-muted);
+}
+
+.loadingEmoji {
+  font-size: 3rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Updating state */
+.orderUpdating {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Order notes */
+.orderNotes {
+  font-size: var(--text-xs);
+  color: #92400E;
+  background: #FEF3C7;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+}
+

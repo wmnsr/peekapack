@@ -3,30 +3,13 @@
  * 
  * Buyers can check the status of their order by entering
  * their order number and phone number. The status is shown
- * as a visual timeline.
+ * as a visual timeline. Data comes from Supabase!
  */
 
 "use client";
 
 import { useState } from "react";
 import styles from "./track.module.css";
-
-/* Mock order for demo purposes (will come from Supabase later) */
-const MOCK_ORDER = {
-  orderNumber: "PP-ABC123",
-  phone: "9876543210",
-  buyerName: "Demo User",
-  items: [
-    { name: "Ocean Friends", size: "Medium", qty: 2, price: 75 },
-    { name: "Enchanted Garden", size: "Small", qty: 1, price: 50 },
-  ],
-  total: 200,
-  delivery: "delivery",
-  address: "B-204, Sunshine Society",
-  status: "preparing",
-  paymentReceived: true,
-  createdAt: "2 May 2026, 6:30 PM",
-};
 
 const STATUS_STEPS = [
   { key: "new", label: "Order Placed", emoji: "📦", desc: "We received your order!" },
@@ -54,19 +37,31 @@ export default function TrackOrderPage() {
 
     setSearching(true);
 
-    /* Simulate API call */
-    await new Promise((r) => setTimeout(r, 1000));
+    try {
+      /**
+       * 📚 LEARNING NOTE: Fetching from our API
+       *
+       * We call our /api/orders/track endpoint with the order
+       * number and phone as query parameters. The API looks
+       * up the order in Supabase and returns the details.
+       */
+      const params = new URLSearchParams({
+        orderNumber: orderNum.trim().toUpperCase(),
+        phone: phone.trim().replace(/\s/g, ""),
+      });
 
-    /* For demo, match the mock order */
-    if (
-      orderNum.trim().toUpperCase() === MOCK_ORDER.orderNumber &&
-      phone.trim() === MOCK_ORDER.phone
-    ) {
-      setOrder(MOCK_ORDER);
-    } else {
-      setError(
-        "Order not found. Please check your order number and phone number."
-      );
+      const response = await fetch(`/api/orders/track?${params}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Order not found. Please check your details.");
+        setOrder(null);
+      } else {
+        setOrder(data.order);
+      }
+    } catch (err) {
+      console.error("[Track Error]", err);
+      setError("Network error. Please check your connection and try again.");
       setOrder(null);
     }
 
@@ -76,6 +71,22 @@ export default function TrackOrderPage() {
   const currentStepIndex = order
     ? STATUS_STEPS.findIndex((s) => s.key === order.status)
     : -1;
+
+  /**
+   * Format a date string nicely
+   */
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    return d.toLocaleString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
 
   return (
     <div className={styles.page}>
@@ -93,7 +104,7 @@ export default function TrackOrderPage() {
               <input
                 id="track-order"
                 className="input"
-                placeholder="e.g., PP-ABC123"
+                placeholder="e.g., PP-X1Y2Z3"
                 value={orderNum}
                 onChange={(e) => setOrderNum(e.target.value)}
                 style={{ textTransform: "uppercase" }}
@@ -119,10 +130,6 @@ export default function TrackOrderPage() {
             {searching ? "Searching... 🔍" : "Track Order 🔍"}
           </button>
           {error && <p className={styles.error}>{error}</p>}
-          <p className={styles.demoHint}>
-            💡 Demo: Use order <strong>PP-ABC123</strong> with phone{" "}
-            <strong>9876543210</strong>
-          </p>
         </form>
 
         {/* Order Result */}
@@ -174,40 +181,40 @@ export default function TrackOrderPage() {
                 <div className={styles.detailRow}>
                   <span>Order #</span>
                   <span className={styles.detailValue}>
-                    {order.orderNumber}
+                    {order.order_number}
                   </span>
                 </div>
                 <div className={styles.detailRow}>
                   <span>Name</span>
-                  <span>{order.buyerName}</span>
+                  <span>{order.buyer_name}</span>
                 </div>
                 <div className={styles.detailRow}>
                   <span>Placed on</span>
-                  <span>{order.createdAt}</span>
+                  <span>{formatDate(order.created_at)}</span>
                 </div>
                 <div className={styles.detailRow}>
                   <span>Delivery</span>
                   <span>
-                    {order.delivery === "pickup"
+                    {order.delivery_preference === "pickup"
                       ? "🏠 Pickup"
-                      : `🛵 ${order.address}`}
+                      : `🛵 ${order.buyer_address}`}
                   </span>
                 </div>
                 <div className={styles.detailRow}>
                   <span>Payment</span>
                   <span>
-                    {order.paymentReceived ? "✅ Received" : "⏳ Pending"}
+                    {order.payment_received ? "✅ Received" : "⏳ Pending (Cash/UPI)"}
                   </span>
                 </div>
 
                 <div className={styles.detailDivider} />
 
-                {order.items.map((item, i) => (
+                {order.order_items?.map((item, i) => (
                   <div key={i} className={styles.detailRow}>
                     <span>
-                      {item.name} ({item.size}) × {item.qty}
+                      {item.product_name} ({item.size}) × {item.quantity}
                     </span>
-                    <span>₹{item.price * item.qty}</span>
+                    <span>₹{item.subtotal}</span>
                   </div>
                 ))}
 
@@ -215,7 +222,7 @@ export default function TrackOrderPage() {
 
                 <div className={`${styles.detailRow} ${styles.detailTotal}`}>
                   <span>Total</span>
-                  <span>₹{order.total}</span>
+                  <span>₹{order.total_amount}</span>
                 </div>
               </div>
             </div>

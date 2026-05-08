@@ -4,6 +4,9 @@
  * This is where buyers enter their details and place an order.
  * They need an invite code to prove they're from the community.
  * No online payment — payment is done in person (cash/UPI).
+ * 
+ * Orders are saved to Supabase, and email notifications are
+ * sent to both the buyer and the admin automatically!
  */
 
 "use client";
@@ -13,9 +16,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import styles from "./checkout.module.css";
-
-/* Mock valid invite codes (will come from Supabase later) */
-const VALID_CODES = ["SUNSHINE2026", "PEEKAPACK", "FAMILYFUN"];
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -32,6 +32,7 @@ export default function CheckoutPage() {
   });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,6 +41,7 @@ export default function CheckoutPage() {
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: null }));
     }
+    if (submitError) setSubmitError("");
   };
 
   const validate = () => {
@@ -54,10 +56,6 @@ export default function CheckoutPage() {
       errs.address = "Please enter your flat/house number for delivery";
     if (!form.inviteCode.trim())
       errs.inviteCode = "Please enter your invite code";
-    else if (
-      !VALID_CODES.includes(form.inviteCode.trim().toUpperCase())
-    )
-      errs.inviteCode = "Invalid invite code. Ask the shop owners for the code!";
     return errs;
   };
 
@@ -70,31 +68,70 @@ export default function CheckoutPage() {
     }
 
     setSubmitting(true);
+    setSubmitError("");
 
-    /* 
-     * 📚 LEARNING NOTE: In the real app, this would call our API
-     * to create the order in Supabase. For now, we simulate it
-     * with a timeout and generate a mock order number.
-     */
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      /**
+       * 📚 LEARNING NOTE: Sending the order to our API
+       *
+       * We POST the order data to /api/orders, which validates
+       * the invite code, saves to Supabase, and sends
+       * notifications — all on the server side!
+       */
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          phone: form.phone.replace(/\s/g, ""),
+          email: form.email.trim(),
+          address: form.address.trim(),
+          delivery: form.delivery,
+          inviteCode: form.inviteCode.trim().toUpperCase(),
+          notes: form.notes.trim(),
+          items: cart.map((item) => ({
+            name: item.name,
+            size: item.size,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+          total: cartTotal,
+        }),
+      });
 
-    const orderNumber = "PP-" + Date.now().toString(36).toUpperCase().slice(-6);
+      const data = await response.json();
 
-    // Store order info for confirmation page
-    sessionStorage.setItem(
-      "peekapack-last-order",
-      JSON.stringify({
-        orderNumber,
-        name: form.name,
-        phone: form.phone,
-        total: cartTotal,
-        itemCount: cart.length,
-        delivery: form.delivery,
-      })
-    );
+      if (!response.ok) {
+        // Server returned an error (e.g., invalid invite code)
+        if (data.error?.toLowerCase().includes("invite")) {
+          setErrors({ inviteCode: data.error });
+        } else {
+          setSubmitError(data.error || "Something went wrong. Please try again.");
+        }
+        setSubmitting(false);
+        return;
+      }
 
-    clearCart();
-    router.push(`/order-confirmed?order=${orderNumber}`);
+      // Store order info for confirmation page
+      sessionStorage.setItem(
+        "peekapack-last-order",
+        JSON.stringify({
+          orderNumber: data.orderNumber,
+          name: form.name,
+          phone: form.phone,
+          total: cartTotal,
+          itemCount: cart.length,
+          delivery: form.delivery,
+        })
+      );
+
+      clearCart();
+      router.push(`/order-confirmed?order=${data.orderNumber}`);
+    } catch (err) {
+      console.error("[Checkout Error]", err);
+      setSubmitError("Network error. Please check your connection and try again.");
+      setSubmitting(false);
+    }
   };
 
   if (!isLoaded) return null;
@@ -124,6 +161,12 @@ export default function CheckoutPage() {
           Fill in your details to place your order. Payment will be done in
           person — cash or UPI!
         </p>
+
+        {submitError && (
+          <div className={styles.submitError}>
+            ⚠️ {submitError}
+          </div>
+        )}
 
         <form className={styles.layout} onSubmit={handleSubmit}>
           {/* Form */}
@@ -164,7 +207,7 @@ export default function CheckoutPage() {
               </div>
 
               <div className="input-group">
-                <label htmlFor="email">Email (optional)</label>
+                <label htmlFor="email">Email (optional — for order updates)</label>
                 <input
                   id="email"
                   name="email"

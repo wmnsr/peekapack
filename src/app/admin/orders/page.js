@@ -4,11 +4,14 @@
  * This is where the kids manage incoming orders.
  * They can change order status, mark payments, and send
  * WhatsApp notifications to buyers with pre-filled messages!
+ * 
+ * Orders are fetched from Supabase in real-time, and status
+ * changes are saved back to the database automatically.
  */
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import styles from "./orders-admin.module.css";
 
 const STATUS_OPTIONS = [
@@ -29,28 +32,99 @@ const STATUS_COLORS = {
   cancelled: { bg: "#FEE2E2", color: "#991B1B" },
 };
 
-const INITIAL_ORDERS = [
-  { id: "PP-X1Y2Z3", buyer: "Aunt Priya", phone: "9876543210", address: "A-301", delivery: "delivery", items: [{ name: "Ocean Friends", size: "M", qty: 2, price: 75 }], total: 150, status: "preparing", paymentReceived: true, createdAt: "2 May, 6:30 PM" },
-  { id: "PP-A1B2C3", buyer: "Mrs. Sharma", phone: "9123456789", address: "B-204", delivery: "delivery", items: [{ name: "Enchanted Garden", size: "S", qty: 1, price: 50 }, { name: "Dino World", size: "L", qty: 1, price: 100 }], total: 150, status: "new", paymentReceived: false, createdAt: "2 May, 6:45 PM" },
-  { id: "PP-D4E5F6", buyer: "Uncle Raj", phone: "9988776655", address: "", delivery: "pickup", items: [{ name: "Sweet Treats", size: "L", qty: 1, price: 100 }], total: 100, status: "ready", paymentReceived: true, createdAt: "2 May, 5:00 PM" },
-  { id: "PP-G7H8I9", buyer: "Riya (A-101)", phone: "9876512345", address: "A-101", delivery: "delivery", items: [{ name: "Rainbow Unicorns", size: "M", qty: 2, price: 75 }], total: 150, status: "delivered", paymentReceived: true, createdAt: "2 May, 3:00 PM" },
-];
-
 export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState(INITIAL_ORDERS);
-  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [updatingId, setUpdatingId] = useState(null);
+
+  /**
+   * 📚 LEARNING NOTE: Fetching orders from our API
+   * 
+   * We use useCallback to memoize this function so it doesn't
+   * get re-created on every render. This is important because
+   * it's used inside useEffect!
+   */
+  const fetchOrders = useCallback(async () => {
+    try {
+      const response = await fetch("/api/orders");
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Failed to load orders");
+        return;
+      }
+
+      setOrders(data.orders || []);
+    } catch (err) {
+      console.error("[Fetch Orders Error]", err);
+      setError("Failed to load orders. Please refresh.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   const filteredOrders = filterStatus === "all"
     ? orders
     : orders.filter(o => o.status === filterStatus);
 
-  const updateStatus = (orderId, newStatus) => {
-    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+  /**
+   * Update order status via API
+   */
+  const updateStatus = async (orderId, newStatus) => {
+    setUpdatingId(orderId);
+    try {
+      const response = await fetch(`/api/orders/${orderId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (response.ok) {
+        // Update local state
+        setOrders(prev => prev.map(o =>
+          o.id === orderId ? { ...o, status: newStatus } : o
+        ));
+      } else {
+        const data = await response.json();
+        alert(`Failed to update: ${data.error}`);
+      }
+    } catch (err) {
+      console.error("[Status Update Error]", err);
+      alert("Failed to update status. Please try again.");
+    }
+    setUpdatingId(null);
   };
 
-  const togglePayment = (orderId) => {
-    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, paymentReceived: !o.paymentReceived } : o));
+  /**
+   * Toggle payment received via API
+   */
+  const togglePayment = async (orderId) => {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    setUpdatingId(orderId);
+    try {
+      const response = await fetch(`/api/orders/${orderId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentReceived: !order.payment_received }),
+      });
+
+      if (response.ok) {
+        setOrders(prev => prev.map(o =>
+          o.id === orderId ? { ...o, payment_received: !o.payment_received } : o
+        ));
+      }
+    } catch (err) {
+      console.error("[Payment Toggle Error]", err);
+    }
+    setUpdatingId(null);
   };
 
   /**
@@ -63,14 +137,55 @@ export default function AdminOrdersPage() {
    */
   const getWhatsAppLink = (order, messageType) => {
     const messages = {
-      confirmed: `Hi ${order.buyer}! 🎉 Your Peek-a-Pack order ${order.id} has been confirmed! We'll start preparing your surprise soon. ✨`,
-      preparing: `Hi ${order.buyer}! 🎨 Great news — we're crafting your Peek-a-Pack order ${order.id} right now! Your surprise will be ready soon! 🎁`,
-      ready: `Hi ${order.buyer}! 🎁 Your Peek-a-Pack order ${order.id} is READY! ${order.delivery === "pickup" ? "Come pick it up anytime! 🏠" : "We'll deliver it to " + order.address + " soon! 🛵"}`,
-      delivered: `Hi ${order.buyer}! 🎉 Your Peek-a-Pack order ${order.id} has been delivered! We hope you love your surprise! Please share your reaction with us! 💕`,
+      confirmed: `Hi ${order.buyer_name}! 🎉 Your Peek-a-Pack order ${order.order_number} has been confirmed! We'll start preparing your surprise soon. ✨`,
+      preparing: `Hi ${order.buyer_name}! 🎨 Great news — we're crafting your Peek-a-Pack order ${order.order_number} right now! Your surprise will be ready soon! 🎁`,
+      ready: `Hi ${order.buyer_name}! 🎁 Your Peek-a-Pack order ${order.order_number} is READY! ${order.delivery_preference === "pickup" ? "Come pick it up anytime! 🏠" : "We'll deliver it to " + order.buyer_address + " soon! 🛵"}`,
+      delivered: `Hi ${order.buyer_name}! 🎉 Your Peek-a-Pack order ${order.order_number} has been delivered! We hope you love your surprise! Please share your reaction with us! 💕`,
     };
-    const text = messages[messageType] || `Hi ${order.buyer}! Update about your order ${order.id}.`;
-    return `https://wa.me/91${order.phone}?text=${encodeURIComponent(text)}`;
+    const text = messages[messageType] || `Hi ${order.buyer_name}! Update about your order ${order.order_number}.`;
+    return `https://wa.me/91${order.buyer_phone}?text=${encodeURIComponent(text)}`;
   };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    const now = new Date();
+    const diff = now - d;
+    const mins = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (mins < 1) return "Just now";
+    if (mins < 60) return `${mins} min ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days < 7) return `${days}d ago`;
+    return d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+  };
+
+  if (loading) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.loading}>
+          <span className={styles.loadingEmoji}>📦</span>
+          <p>Loading orders...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.loading}>
+          <span className={styles.loadingEmoji}>⚠️</span>
+          <p>{error}</p>
+          <button className="btn btn-primary" onClick={() => { setError(""); setLoading(true); fetchOrders(); }}>
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
@@ -96,16 +211,25 @@ export default function AdminOrdersPage() {
         })}
       </div>
 
+      {/* Empty state */}
+      {filteredOrders.length === 0 && (
+        <div className={styles.loading}>
+          <span className={styles.loadingEmoji}>📭</span>
+          <p>{filterStatus === "all" ? "No orders yet! Share your shop link to get started." : `No ${filterStatus} orders right now.`}</p>
+        </div>
+      )}
+
       {/* Orders List */}
       <div className={styles.ordersList}>
         {filteredOrders.map(order => {
           const sc = STATUS_COLORS[order.status];
+          const isUpdating = updatingId === order.id;
           return (
-            <div key={order.id} className={styles.orderCard}>
+            <div key={order.id} className={`${styles.orderCard} ${isUpdating ? styles.orderUpdating : ""}`}>
               <div className={styles.orderHeader}>
                 <div>
-                  <span className={styles.orderId}>{order.id}</span>
-                  <span className={styles.orderTime}>{order.createdAt}</span>
+                  <span className={styles.orderId}>{order.order_number}</span>
+                  <span className={styles.orderTime}>{formatDate(order.created_at)}</span>
                 </div>
                 <span className={styles.statusBadge} style={{ background: sc.bg, color: sc.color }}>
                   {STATUS_OPTIONS.find(s => s.key === order.status)?.emoji}{" "}
@@ -115,28 +239,34 @@ export default function AdminOrdersPage() {
 
               <div className={styles.orderBody}>
                 <div className={styles.buyerInfo}>
-                  <span className={styles.buyerName}>👤 {order.buyer}</span>
-                  <span className={styles.buyerPhone}>📱 {order.phone}</span>
+                  <span className={styles.buyerName}>👤 {order.buyer_name}</span>
+                  <span className={styles.buyerPhone}>📱 {order.buyer_phone}</span>
                   <span className={styles.buyerDelivery}>
-                    {order.delivery === "pickup" ? "🏠 Pickup" : `🛵 ${order.address}`}
+                    {order.delivery_preference === "pickup" ? "🏠 Pickup" : `🛵 ${order.buyer_address}`}
                   </span>
                 </div>
                 <div className={styles.orderItems}>
-                  {order.items.map((item, i) => (
+                  {order.order_items?.map((item, i) => (
                     <span key={i} className={styles.itemLine}>
-                      {item.name} ({item.size}) × {item.qty} — ₹{item.price * item.qty}
+                      {item.product_name} ({item.size}) × {item.quantity} — ₹{item.subtotal}
                     </span>
                   ))}
                 </div>
                 <div className={styles.orderFooter}>
-                  <span className={styles.orderTotal}>Total: ₹{order.total}</span>
+                  <span className={styles.orderTotal}>Total: ₹{order.total_amount}</span>
                   <button
-                    className={`${styles.paymentBtn} ${order.paymentReceived ? styles.paid : styles.unpaid}`}
+                    className={`${styles.paymentBtn} ${order.payment_received ? styles.paid : styles.unpaid}`}
                     onClick={() => togglePayment(order.id)}
+                    disabled={isUpdating}
                   >
-                    {order.paymentReceived ? "💰 Paid" : "⏳ Payment Pending"}
+                    {order.payment_received ? "💰 Paid" : "⏳ Payment Pending"}
                   </button>
                 </div>
+                {order.notes && (
+                  <div className={styles.orderNotes}>
+                    📝 {order.notes}
+                  </div>
+                )}
               </div>
 
               {/* Actions */}
@@ -147,6 +277,7 @@ export default function AdminOrdersPage() {
                     value={order.status}
                     onChange={e => updateStatus(order.id, e.target.value)}
                     className="input"
+                    disabled={isUpdating}
                   >
                     {STATUS_OPTIONS.map(s => (
                       <option key={s.key} value={s.key}>{s.emoji} {s.label}</option>
